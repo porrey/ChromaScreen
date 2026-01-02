@@ -1,6 +1,6 @@
 {
-    "InitConfigDone": false,
-    "Printer1WizardDone": false,
+    "InitConfigDone": true,
+    "Printer1WizardDone": true,
     "Printer2WizardDone": false,
     "Printer3WizardDone": false,
     "Printer4WizardDone": false,

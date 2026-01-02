@@ -9,9 +9,9 @@ KSENV="${CHROMASCREEN_VENV:-${HOME}/.ChromaScreen-env}"
 
 XSERVER="xinit xinput x11-xserver-utils xserver-xorg-input-evdev xserver-xorg-input-libinput"
 FBDEV="xserver-xorg-video-fbdev"
-PYTHON="python3-virtualenv virtualenv python3-distutils"
+PYTHON="python3-venv python3-pip python3-setuptools python3-wheel"
 PYGOBJECT="libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0"
-MISC="librsvg2-common libopenjp2-7 libatlas-base-dev wireless-tools libdbus-glib-1-dev autoconf libudev-dev"
+MISC="librsvg2-common libopenjp2-7 libopenblas-dev libblas-dev liblapack-dev wireless-tools libdbus-glib-1-dev autoconf libudev-dev"
 OPTIONAL="xserver-xorg-legacy fonts-nanum fonts-ipafont libmpv-dev zip unzip git"
 
 # moonraker will check this list when updating
@@ -99,31 +99,30 @@ install_packages() {
 
 create_virtualenv() {
     echo_text "Creating virtual environment"
-    if [ ! -d ${KSENV} ]; then
-        virtualenv -p /usr/bin/python3 ${KSENV}
-        #         GET_PIP="${HOME}/get-pip.py"
-        #         virtualenv --no-pip -p /usr/bin/python3 ${KSENV}
-        #         curl https://bootstrap.pypa.io/pip/3.6/get-pip.py -o ${GET_PIP}
-        #         ${KSENV}/bin/python ${GET_PIP}
-        #         rm ${GET_PIP}
+    if [ ! -d "${KSENV}" ]; then
+        /usr/bin/python3 -m venv --system-site-packages "${KSENV}" || {
+            echo_error "Unable to create venv at ${KSENV}"
+            exit 1
+        }
     fi
 
-    source ${KSENV}/bin/activate
-    pip --disable-pip-version-check install -r ${KSPATH}/scripts/ChromaScreen-requirements.txt
+    # Always use the venv's pip directly (no activate/deactivate needed)
+    "${KSENV}/bin/python" -m pip --disable-pip-version-check install -U pip setuptools wheel
+
+    "${KSENV}/bin/pip" --disable-pip-version-check install -r "${KSPATH}/scripts/ChromaScreen-requirements.txt"
     if [ $? -gt 0 ]; then
         echo_error "Error: pip install exited with status code $?"
-        echo_text "Trying again with new tools..."
-        sudo apt-get install -y build-essential cmake
-        pip install --upgrade pip setuptools
-        pip install -r ${KSPATH}/scripts/ChromaScreen-requirements.txt
+        echo_text "Trying again with build tools..."
+        sudo apt-get install -y build-essential cmake python3-dev pkg-config
+        "${KSENV}/bin/python" -m pip install -U pip setuptools wheel
+        "${KSENV}/bin/pip" install -r "${KSPATH}/scripts/ChromaScreen-requirements.txt"
         if [ $? -gt 0 ]; then
             echo_error "Unable to install dependencies, aborting install."
-            deactivate
             exit 1
         fi
     fi
-    deactivate
-    echo_ok "Virtual enviroment created"
+
+    echo_ok "Virtual environment created"
 }
 
 install_systemd_service() {
