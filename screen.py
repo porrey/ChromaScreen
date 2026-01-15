@@ -162,8 +162,8 @@ class ChromaScreen(Gtk.Window):
             monitor = Gdk.Display.get_default().get_monitor(0)
         if monitor is None:
             raise RuntimeError("Couldn't get default monitor")
-        self.width = 1024
-        self.height = 600
+        self.width = 1280
+        self.height = 720
         self.set_default_size(self.width, self.height)
         self.set_resizable(True)
 
