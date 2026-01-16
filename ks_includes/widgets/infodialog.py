@@ -5,15 +5,30 @@ from gi.repository import Gtk, Pango, GLib, GdkPixbuf
 
 class InfoDialog(Gtk.Dialog):
     def __init__(self,this, _content, isActive= True, isCamera=False):
-        super().__init__(title="Info Dialog",parent=None ,flags=0)
-        self.parent = this
-        self.set_size_request(0, 0)
-        self.set_default_size(800, 20)
+        #super().__init__(title="Info Dialog",parent=None ,flags=0)
+        #self.parent = this
+        #self.set_size_request(0, 0)
+        #self.set_default_size(800, 20)
 
          # Get current position of dialog
-        pos = self.get_position()
+        #pos = self.get_position()
         # Move dialog to the desired location
-        self.move(pos[0] + 125, pos[1] + 225)
+        #self.move(pos[0] + 125, pos[1] + 225)
+        self.parent = this
+        parent_win = getattr(this, "_screen", this)  # panels have _screen; screen itself does not
+        super().__init__(title="Info Dialog", parent=parent_win, flags=0)
+        self.set_transient_for(parent_win)
+        self.set_decorated(False)
+        self.set_keep_above(True)
+        self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
+
+        # Optional: make width proportional to the current window size
+        try:
+            w, h = parent_win.get_size()
+            self.set_default_size(int(w * 0.90), -1)
+        except Exception:
+            self.set_default_size(800, -1)
+
 
         svg_file = "styles/z-bolt/images/bell.svg"
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(svg_file, 40 , 40)
@@ -81,8 +96,12 @@ class InfoDialog(Gtk.Dialog):
             GLib.timeout_add(50, self.destroyCamera)
     def on_click_emergency_stop(self, button):
         self.destroy()
-        self.parent._screen._ws.klippy.emergency_stop()
+        #self.parent._screen._ws.klippy.emergency_stop()
+        screen = getattr(self.parent, "_screen", self.parent)
+        screen._ws.klippy.emergency_stop()
     
     def destroyCamera(self):
         self.destroy()
-        self.parent._screen.show_panel("co_print_setting_screen", "co_print_setting_screen",  None, 2, False)
+        #self.parent._screen.show_panel("co_print_setting_screen", "co_print_setting_screen",  None, 2, False)
+        screen = getattr(self.parent, "_screen", self.parent)
+        screen.show_panel("co_print_setting_screen", "co_print_setting_screen", None, 2, False)
