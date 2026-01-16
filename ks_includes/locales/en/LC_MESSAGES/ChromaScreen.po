@@ -2108,7 +2108,7 @@ msgstr ""
 "X, Y, and Z axes are returning back to their home positions. Please wait."
 
 msgid "X,Y,Z Hareket Mesafesi (mm)"
-msgstr "X,Y,Z Hareket Mesafesi (mm)"
+msgstr "X,Y,Z Movement Distance (mm)"
 
 msgid "XY Move Speed (mm/s)"
 msgstr "XY Move Speed (mm/s)"
